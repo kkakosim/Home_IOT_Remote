@@ -28,7 +28,7 @@ const int BUZZER = 7;
 
 const int HUMIDITY_LOW = 45;
 const int HUMIDITY_HIGH = 55;
-const int LEVEL_LOW = 50;
+const int LEVEL_LOW = 75;
 const int LEVEL_HIGH = 85;
 bool normal = true;
 bool updt = true;
@@ -173,7 +173,7 @@ uint8_t data[] = "Link Ok";
 uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
 
 void loop() {
-  char state[11];
+  char state[15];
   LedOut();
   updt = false;
   if (rf69_manager.available())
@@ -214,7 +214,7 @@ void loop() {
 
       Blink(LED, 40, 3); //blink LED 3 times, 40ms between blinks
 
-      strcpy(state, "Normal");
+      strcpy(state, "Normal ");
       if (RH >= HUMIDITY_HIGH || lvl >= LEVEL_HIGH) {
         lcd.setBacklight(HIGH);
         Buzz(BUZZER, 100, 3);
@@ -225,7 +225,7 @@ void loop() {
         Blink(YELLOW, 100, 3);
       }
       else {
-        lcd.setBacklight(LOW);
+        lcd.setBacklight(HIGH);
         digitalWrite(GREEN, HIGH);   // all LED OFF
       }
 
@@ -233,13 +233,13 @@ void loop() {
         strcpy(state, "H% High ");
       }
       else if (RH >= HUMIDITY_LOW) {
-        strcpy(state, "H% Medium");
+        strcpy(state, "H% Medium ");
       }
       if (lvl >= LEVEL_HIGH) {
-        strcpy(state, "Full    ");
+        strcpy(state, "Tank Full ");
       }
       else if (lvl >= LEVEL_LOW) {
-        strcpy(state, "Empty Tank");
+        strcpy(state, "Empty Tank ");
       }
 
       // Send a reply back to the originator client
@@ -255,8 +255,8 @@ void loop() {
     errorcycles += 1;
     delay(500);
   }
-  if (errorcycles > 10) {
-    strcpy(state, "No Com.");
+  if (errorcycles > 60) {
+    strcpy(state, "No Com. ");
     lcd.setBacklight(HIGH);
     digitalWrite(RED, HIGH);
     delay(1000);
@@ -265,10 +265,15 @@ void loop() {
   //Serial.println(errorcycles);
 
   //*** Print Alarms ****/
-  if (errorcycles > 10 || updt) {
+  if (errorcycles > 60 || updt) {
+    //char errc[3];
+    //itoa(errorcycles, errc, 10);
+    //strcat(state, errc);
     lcd.setCursor(0, 1);
-    lcd.print("Status:");
+    lcd.print("> ");
     lcd.print(state);
+    lcd.setCursor(14, 1);
+    lcd.print(errorcycles);
     Serial.print("Status: ");
     Serial.println(state);
   }
