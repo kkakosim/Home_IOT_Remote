@@ -13,7 +13,7 @@
 #include <RHReliableDatagram.h>
 #include <DHT.h>
 
-const char *ver="!!version 0.1 client";
+const char *ver="!!version 0.2 client";
 
 /************ Sensors Setup *************/
 #define DHTTYPE DHT11   // DHT 11
@@ -30,6 +30,9 @@ DHT dht(DHTPIN, DHTTYPE);
 #define ZERO_VOLUME_RESISTANCE    2500.0    // Resistance value (in ohms) when no liquid is present.
 #define CALIBRATION_RESISTANCE    660.00    // Resistance value (in ohms) when liquid is at max line.
 #define CALIBRATION_VOLUME        100.00    // Volume (in any units) when liquid is at max line.
+
+#define MAGSENSOR 7 //magnetic sensor pin
+int magstate; //magnetic sensor state 0-close 1-open switch
 
 /************ Radio Setup ***************/
 
@@ -145,6 +148,8 @@ void setup()
   pinMode(LED, OUTPUT);
 
   Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
+
+  pinMode(MAGSENSOR, INPUT_PULLUP);
 }
 
 
@@ -180,6 +185,10 @@ void loop() {
   Serial.print(F("°C "));
   Serial.print(l);
   Serial.println(F("%"));
+
+  //check magnetic sensor
+  magstate = digitalRead(MAGSENSOR);
+  
   
   // Check if any reads failed and exit early (to try again).
   if (isnan(rh) || isnan(t) || isnan(l)) {
@@ -191,6 +200,7 @@ void loop() {
   char tempC[3];
   char lvl[3];
   char res[5];
+  char mags[2];
   strcpy (radiopacket,"H");
   dtostrf(rh, 2, 0, RelH); //convert RH to char
   strcat(radiopacket,RelH);
@@ -206,6 +216,12 @@ void loop() {
   dtostrf(resistance, 4, 0, res); // convert resistance to char
   strcat(radiopacket,res);
   strcat(radiopacket,"Ohm");
+  itoa(magstate, mags, 2);
+  //Serial.println(mags);
+  strcat(radiopacket," M");
+  strcat(radiopacket,mags);
+  strcat(radiopacket,"%");
+  
 //  itoa(BTmax, complete_path, 10); //convert int to charr
 //  itoa(packetnum++, radiopacket + 2, 3);
 //  itoa(h, radiopacket + 8, 2);
@@ -231,8 +247,9 @@ void loop() {
   } else {
     Serial.println("Sending failed (no ack)");
     //digitalWrite(13, HIGH);
-
   }
+
+  //Blink(LED,1000,1);
 }
 
 

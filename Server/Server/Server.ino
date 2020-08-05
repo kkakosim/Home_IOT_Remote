@@ -14,7 +14,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-const char *ver = "!!version 0.1 server";
+const char *ver = "!!version 0.2 server";
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 
@@ -41,6 +41,15 @@ bool updt = true;
 // who am i? (server address)
 #define MY_ADDRESS     1
 
+// These #defines make it easy to set the backlight color
+#define LCD_OFF 0x0
+#define LCD_RED 0x1
+#define LCD_YELLOW 0x3
+#define LCD_GREEN 0x2
+#define LCD_TEAL 0x6
+#define LCD_BLUE 0x4
+#define LCD_VIOLET 0x5
+#define LCD_WHITE 0x7
 
 #if defined (__AVR_ATmega32U4__) // Feather 32u4 w/Radio
 #define RFM69_CS      8
@@ -202,6 +211,10 @@ void loop() {
       tok = strtok(0, "%");
       int lvl = atoi(tok);
       itoa(lvl, lvlc, 10);
+      tok = strtok(0, "M");
+      tok = strtok(0, "%");
+      int magsensor = atoi(tok);
+      //Serial.println(magsensor);
       //strcat(text,"
 
       //Serial.print("R#"); Serial.print(from);
@@ -221,7 +234,7 @@ void loop() {
         Blink(RED, 100, 3);
       }
       else if (RH >= HUMIDITY_LOW || lvl >= LEVEL_LOW) {
-        lcd.setBacklight(HIGH);
+        lcd.setBacklight(LCD_YELLOW);
         Blink(YELLOW, 100, 3);
       }
       else {
@@ -241,6 +254,15 @@ void loop() {
       else if (lvl >= LEVEL_LOW) {
         strcpy(state, "Empty Tank ");
       }
+
+      if (magsensor) {
+        lcd.setBacklight(HIGH);
+        strcpy(state, "Door Open");
+        Buzz(BUZZER, 50, 5);
+        Blink(RED, 50, 5);
+        Blink(LED, 50, 5);
+      }
+      
 
       // Send a reply back to the originator client
       if (!rf69_manager.sendtoWait(state, sizeof(state), from)) {
