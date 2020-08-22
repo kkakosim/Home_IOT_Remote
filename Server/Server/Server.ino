@@ -125,7 +125,7 @@ void setup()
 
   LedOut();
 
-  Blink(GREEN, 100, 2);
+  Blink(GREEN, 500, 2);
   Buzz(BUZZER, 1000, 1);
 
   lcd.begin(16, 2);

@@ -108,7 +108,7 @@ void setup()
   Serial.println(ver);
   //while (!Serial) { delay(1); } // wait until serial console is open, remove if not tethered to computer
 
-  //pinMode(LED, OUTPUT);
+  pinMode(LED, OUTPUT);
   //pinMode(13, OUTPUT);
   pinMode(RFM69_RST, OUTPUT);
   digitalWrite(RFM69_RST, LOW);
@@ -145,11 +145,14 @@ void setup()
                   };
   rf69.setEncryptionKey(key);
 
-  pinMode(LED, OUTPUT);
+  //pinMode(LED, OUTPUT);
 
   Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
 
   pinMode(MAGSENSOR, INPUT_PULLUP);
+
+  //digitalWrite(LED, LOW);
+  //Serial.println(LED);
 }
 
 
@@ -240,7 +243,7 @@ void loop() {
       Serial.print(rf69.lastRssi());
       Serial.print("] : ");
       Serial.println((char*)buf);
-      Blink(LED, 40, 3); //blink LED 3 times, 40ms between blinks
+      //Blink(LED, 100, 3); //blink LED 3 times, 40ms between blinks
     } else {
       Serial.println("No reply, is anyone listening?");
     }
@@ -248,8 +251,6 @@ void loop() {
     Serial.println("Sending failed (no ack)");
     //digitalWrite(13, HIGH);
   }
-
-  //Blink(LED,1000,1);
 }
 
 
